@@ -9,15 +9,16 @@ function App() {
     recognition.continuous = true;
     recognition.lang = "en-US";
 
-    recognition.onresult = (event) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       const currentTranscript =
         event.results[event.results.length - 1][0].transcript;
       setRecognizedText(`${currentTranscript} ?`);
       handleVoiceCommand(currentTranscript);
     };
 
-    recognition.onerror = (event) => {
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error("Speech recognition error:", event.error);
+      speakText(event.message);
     };
 
     if (isListening) {
