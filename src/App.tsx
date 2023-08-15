@@ -88,7 +88,7 @@ function App() {
 
   return (
     <>
-      <div className="p-6 h-screen flex flex-col items-center">
+      <div className="p-6 flex flex-col items-center">
         <span className="mb-4 font-bold text-xl">
           Ask something related about color
         </span>
