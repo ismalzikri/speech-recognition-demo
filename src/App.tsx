@@ -16,7 +16,8 @@ function App() {
   const recognition = new window.webkitSpeechRecognition();
 
   useEffect(() => {
-    // recognition.continuous = true;
+    recognition.continuous = true;
+    recognition.interimResults = true;
     recognition.lang = "en-US";
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -90,9 +91,9 @@ function App() {
   const toggleListening = () => {
     setIsListening((prevState) => !prevState);
     setRecognizedText("");
-    // if (!isListening) {
-    //   speakText("start listening..");
-    // }
+    if (!isListening) {
+      speakText("start listening..");
+    }
   };
 
   const handleResponseCommand = (response: string) => {
