@@ -13,10 +13,10 @@ function App() {
   const [recognizedText, setRecognizedText] = useState("");
   const [loadedVoices, setLoadedVoices] = useState<SpeechSynthesisVoice[]>([]);
 
-  const recognition = new window.webkitSpeechRecognition()
+  const recognition = new window.webkitSpeechRecognition();
 
   useEffect(() => {
-    recognition.continuous = true;
+    // recognition.continuous = true;
     recognition.lang = "en-US";
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -27,8 +27,10 @@ function App() {
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      console.error("Speech recognition error:", event.error);
+      speakText(event.error);
       speakText(event.message);
+
+      setIsListening(false);
     };
 
     if (isListening) {
@@ -54,7 +56,7 @@ function App() {
     return () => {
       recognition.stop();
       speechSynthesis.onvoiceschanged = null;
-      recognition.onresult = null; 
+      recognition.onresult = null;
       recognition.onerror = null;
     };
   }, [isListening]);
@@ -62,11 +64,11 @@ function App() {
   const handleVoiceCommand = (command: string) => {
     // simulation user answer or command
     const confirmCheckWords = ["yes", "yeah", "course", "I do"];
-    const anyWordIncluded = confirmCheckWords.some((word) =>
+    const confirmChecked = confirmCheckWords.some((word) =>
       command.toLowerCase().includes(word)
     );
 
-    if (anyWordIncluded) {
+    if (confirmChecked) {
       handleResponseCommand(
         "okay then, now you can ask me related question about color"
       );
@@ -88,9 +90,9 @@ function App() {
   const toggleListening = () => {
     setIsListening((prevState) => !prevState);
     setRecognizedText("");
-    if (!isListening) {
-      speakText('start listening..')
-    }
+    // if (!isListening) {
+    //   speakText("start listening..");
+    // }
   };
 
   const handleResponseCommand = (response: string) => {
@@ -100,7 +102,6 @@ function App() {
   const speakText = (text: string, targetLanguage: string = "") => {
     const voices = loadedVoices;
     let desiredVoice = null;
-
 
     if (targetLanguage === "") {
       desiredVoice = voices.find((voice) => voice.lang === "en-GB");
@@ -127,7 +128,11 @@ function App() {
         <p className="text-center italic text-sm">
           example: what kind of color in front of me right now?
         </p>
-        <p className="w-full text-center">{recognizedText}</p>
+        <p className="w-full text-center mb-5">{recognizedText}</p>
+        <p className="w-full text-center text-xs font-bold">
+          Note: for better voice recognition response, please use your earphone
+          or headset.
+        </p>
         <button
           onClick={toggleListening}
           className="fixed bottom-8 border-2 border-white p-2 rounded-full"
