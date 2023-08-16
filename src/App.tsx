@@ -1,9 +1,19 @@
 import { useEffect, useState } from "react";
 
+/*
+  - fix problem about latency listening & reponse sound
+  - create simulation for multiple languange, specific english & indonesia
+  - improve interactivity responses
+
+  const questions = ['who','what','when','where','why','how','can', 'could']
+*/
+
 function App() {
   const [isListening, setIsListening] = useState(false);
   const [recognizedText, setRecognizedText] = useState("");
-  const recognition = new window.webkitSpeechRecognition();
+  const [loadedVoices, setLoadedVoices] = useState<SpeechSynthesisVoice[]>([]);
+
+  const recognition = new window.webkitSpeechRecognition()
 
   useEffect(() => {
     recognition.continuous = true;
@@ -25,8 +35,26 @@ function App() {
       recognition.start();
     }
 
+    const initializeVoices = () => {
+      const voices = speechSynthesis.getVoices();
+      setLoadedVoices(voices);
+    };
+
+    const handleVoicesChanged = () => {
+      initializeVoices();
+      speechSynthesis.onvoiceschanged = null; // Reset the event listener after initialization
+    };
+
+    // Check if voices are already loaded
+    if (speechSynthesis.getVoices().length > 0) {
+      initializeVoices();
+    } else {
+      speechSynthesis.onvoiceschanged = handleVoicesChanged;
+    }
+
     return () => {
       recognition.stop();
+      speechSynthesis.onvoiceschanged = null;
     };
   }, [isListening]);
 
@@ -59,6 +87,9 @@ function App() {
   const toggleListening = () => {
     setIsListening((prevState) => !prevState);
     setRecognizedText("");
+    if (!isListening) {
+      speakText('start listening..')
+    }
   };
 
   const handleResponseCommand = (response: string) => {
@@ -66,9 +97,9 @@ function App() {
   };
 
   const speakText = (text: string, targetLanguage: string = "") => {
-    const voices = speechSynthesis.getVoices();
-
+    const voices = loadedVoices;
     let desiredVoice = null;
+
 
     if (targetLanguage === "") {
       desiredVoice = voices.find((voice) => voice.lang === "en-GB");
