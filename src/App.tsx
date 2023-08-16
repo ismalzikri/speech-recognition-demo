@@ -18,6 +18,7 @@ function App() {
   useEffect(() => {
     recognition.continuous = true;
     recognition.lang = "en-US";
+    recognition.interimResults = true
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       const currentTranscript =
