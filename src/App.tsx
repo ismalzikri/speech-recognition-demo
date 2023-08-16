@@ -18,7 +18,6 @@ function App() {
   useEffect(() => {
     recognition.continuous = true;
     recognition.lang = "en-US";
-    recognition.interimResults = true
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       const currentTranscript =
@@ -43,7 +42,6 @@ function App() {
 
     const handleVoicesChanged = () => {
       initializeVoices();
-      speechSynthesis.onvoiceschanged = null; // Reset the event listener after initialization
     };
 
     // Check if voices are already loaded
@@ -56,6 +54,8 @@ function App() {
     return () => {
       recognition.stop();
       speechSynthesis.onvoiceschanged = null;
+      recognition.onresult = null; 
+      recognition.onerror = null;
     };
   }, [isListening]);
 
