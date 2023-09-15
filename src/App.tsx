@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 
 /*
-  - fix problem about latency listening & reponse sound
   - create simulation for multiple languange, specific english & indonesia
   - improve interactivity responses
 
@@ -9,33 +11,33 @@ import { useEffect, useState } from "react";
 */
 
 function App() {
-  const [isListening, setIsListening] = useState(false);
-  const [recognizedText, setRecognizedText] = useState("");
   const [loadedVoices, setLoadedVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  const [isListening, setisListening] = useState<boolean>(false);
 
-  const recognition = new window.webkitSpeechRecognition();
+  const {
+    transcript,
+    finalTranscript,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+    isMicrophoneAvailable,
+  } = useSpeechRecognition();
 
   useEffect(() => {
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = "en-US";
+    if (!browserSupportsSpeechRecognition) {
+      alert(
+        `Sorry, seems like your browser doesn't support SpeechRecognition API`
+      );
+    }
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-      const currentTranscript =
-        event.results[event.results.length - 1][0].transcript;
-      setRecognizedText(`${currentTranscript} ?`);
-      handleVoiceCommand(currentTranscript);
-    };
+    if (!isMicrophoneAvailable) {
+      alert(
+        "Sorry, seems like you not give the microphone permission, reload and allow when the app asking you!"
+      );
+    }
 
-    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      speakText(event.error);
-      speakText(event.message);
-
-      setIsListening(false);
-    };
-
-    if (isListening) {
-      recognition.start();
+    if (finalTranscript !== "") {
+      handleVoiceCommand(finalTranscript);
     }
 
     const initializeVoices = () => {
@@ -55,12 +57,18 @@ function App() {
     }
 
     return () => {
-      recognition.stop();
       speechSynthesis.onvoiceschanged = null;
-      recognition.onresult = null;
-      recognition.onerror = null;
     };
-  }, [isListening]);
+  }, [
+    browserSupportsSpeechRecognition,
+    isMicrophoneAvailable,
+    isSpeaking,
+    finalTranscript,
+  ]);
+
+  const startListening = () =>
+    SpeechRecognition.startListening({ continuous: true, language: "en-US" });
+  const stopListening = () => SpeechRecognition.stopListening();
 
   const handleVoiceCommand = (command: string) => {
     // simulation user answer or command
@@ -74,8 +82,10 @@ function App() {
         "okay then, now you can ask me related question about color"
       );
     } else if (command.toLowerCase().includes("stop")) {
-      stopListening();
       speakText("Listening stopped.");
+      stopListening();
+      setisListening(false);
+      resetTranscript();
     } else if (command.toLowerCase().includes("color")) {
       handleResponseCommand("The color is light blue");
     } else {
@@ -83,17 +93,20 @@ function App() {
     }
   };
 
-  const stopListening = () => {
-    setIsListening(false);
-    setRecognizedText("");
-  };
-
   const toggleListening = () => {
-    setIsListening((prevState) => !prevState);
-    setRecognizedText("");
-    if (!isListening) {
+    if (isListening) {
+      // If currently listening, stop listening
+      stopListening();
+    } else {
+      // If not listening, start listening and speak a message
+      startListening();
+      setIsSpeaking(true);
       speakText("start listening..");
     }
+    // Toggle the isListening state
+    setisListening((prevState) => !prevState);
+    // Reset the transcript when starting or stopping listening
+    resetTranscript();
   };
 
   const handleResponseCommand = (response: string) => {
@@ -117,6 +130,13 @@ function App() {
     utterance.rate = 0.9;
     utterance.pitch = 1.2;
 
+    utterance.onend = () => {
+      if (finalTranscript.toLowerCase().includes("stop")) return;
+      setIsSpeaking(false);
+      startListening();
+      resetTranscript();
+    };
+
     speechSynthesis.speak(utterance);
   };
 
@@ -129,7 +149,7 @@ function App() {
         <p className="text-center italic text-sm">
           example: what kind of color in front of me right now?
         </p>
-        <p className="w-full text-center mb-5">{recognizedText}</p>
+        <p className="w-full text-center mb-5">{transcript}</p>
         <p className="w-full text-center text-xs font-bold">
           Note: for better voice recognition response, please use your earphone
           or headset.
