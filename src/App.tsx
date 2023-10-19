@@ -11,6 +11,7 @@ function App() {
 
   const {
     transcript,
+    interimTranscript,
     finalTranscript,
     resetTranscript,
     browserSupportsSpeechRecognition,
@@ -28,6 +29,10 @@ function App() {
       alert(
         "Sorry, seems like you not give the microphone permission, reload and allow when the app asking you!"
       );
+    }
+
+    if (interimTranscript !== "") {
+      handleVoiceCommand(interimTranscript);
     }
 
     if (finalTranscript !== "") {
@@ -53,11 +58,13 @@ function App() {
     return () => {
       speechSynthesis.onvoiceschanged = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     browserSupportsSpeechRecognition,
     isMicrophoneAvailable,
     isSpeaking,
     finalTranscript,
+    interimTranscript,
   ]);
 
   const startListening = () =>
