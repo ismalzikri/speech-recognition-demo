@@ -3,17 +3,11 @@ import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 
-/*
-  - create simulation for multiple languange, specific english & indonesia
-  - improve interactivity responses
-
-  const questions = ['who','what','when','where','why','how','can', 'could']
-*/
-
 function App() {
   const [loadedVoices, setLoadedVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
-  const [isListening, setisListening] = useState<boolean>(false);
+  const [isListening, setIsListening] = useState<boolean>(false);
+  const [listeningLang, setIslisteningLang] = useState<string>("en-US");
 
   const {
     transcript,
@@ -67,29 +61,38 @@ function App() {
   ]);
 
   const startListening = () =>
-    SpeechRecognition.startListening({ continuous: true, language: "en-US" });
+    SpeechRecognition.startListening({
+      continuous: true,
+      language: listeningLang,
+    });
   const stopListening = () => SpeechRecognition.stopListening();
 
   const handleVoiceCommand = (command: string) => {
     // simulation user answer or command
-    const confirmCheckWords = ["yes", "yeah", "course", "I do"];
-    const confirmChecked = confirmCheckWords.some((word) =>
-      command.toLowerCase().includes(word)
-    );
 
-    if (confirmChecked) {
-      handleResponseCommand(
-        "okay then, now you can ask me related question about color"
-      );
-    } else if (command.toLowerCase().includes("stop")) {
+    if (
+      command.toLowerCase().includes("stop") ||
+      command.toLowerCase().includes("berhenti")
+    ) {
       speakText("Listening stopped.");
       stopListening();
-      setisListening(false);
+      setIsListening(false);
       resetTranscript();
     } else if (command.toLowerCase().includes("color")) {
-      handleResponseCommand("The color is light blue");
+      speakText("The color is light blue");
+    } else if (command.toLowerCase().includes("warna")) {
+      speakText("Warna nya adalah biru", "id");
+    } else if (
+      command.toLowerCase().includes("indonesia") ||
+      command.toLowerCase().includes("indonesian")
+    ) {
+      speakText("Mengganti bahasa ke indonesia", "id");
+      setIslisteningLang("id");
+    } else if (command.toLowerCase().includes("english")) {
+      speakText("Switch to english");
+      setIslisteningLang("en-US");
     } else {
-      handleResponseCommand(`I didn't get you, could you say it again?`);
+      speakText(`I didn't get you, could you say it again?`);
     }
   };
 
@@ -104,13 +107,9 @@ function App() {
       speakText("start listening..");
     }
     // Toggle the isListening state
-    setisListening((prevState) => !prevState);
+    setIsListening((prevState) => !prevState);
     // Reset the transcript when starting or stopping listening
     resetTranscript();
-  };
-
-  const handleResponseCommand = (response: string) => {
-    speakText(response);
   };
 
   const speakText = (text: string, targetLanguage: string = "") => {
