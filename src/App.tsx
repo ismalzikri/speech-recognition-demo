@@ -31,13 +31,13 @@ function App() {
       );
     }
 
-    if (interimTranscript !== "") {
-      handleVoiceCommand(interimTranscript);
-    }
-
-    // if (finalTranscript !== "") {
-    //   handleVoiceCommand(finalTranscript);
+    // if (interimTranscript !== "") {
+    //   handleVoiceCommand(interimTranscript);
     // }
+
+    if (finalTranscript !== "" && transcript !== "") {
+      handleVoiceCommand(transcript);
+    }
 
     const initializeVoices = () => {
       const voices = speechSynthesis.getVoices();
