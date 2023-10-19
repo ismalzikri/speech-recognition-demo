@@ -35,9 +35,9 @@ function App() {
       handleVoiceCommand(interimTranscript);
     }
 
-    if (finalTranscript !== "") {
-      handleVoiceCommand(finalTranscript);
-    }
+    // if (finalTranscript !== "") {
+    //   handleVoiceCommand(finalTranscript);
+    // }
 
     const initializeVoices = () => {
       const voices = speechSynthesis.getVoices();
