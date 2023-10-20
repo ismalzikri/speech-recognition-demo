@@ -11,7 +11,6 @@ function App() {
 
   const {
     transcript,
-    interimTranscript,
     finalTranscript,
     resetTranscript,
     browserSupportsSpeechRecognition,
@@ -35,8 +34,8 @@ function App() {
     //   handleVoiceCommand(interimTranscript);
     // }
 
-    if (finalTranscript !== "" && transcript !== "") {
-      handleVoiceCommand(transcript);
+    if (finalTranscript !== "") {
+      handleVoiceCommand(finalTranscript);
     }
 
     const initializeVoices = () => {
@@ -64,7 +63,6 @@ function App() {
     isMicrophoneAvailable,
     isSpeaking,
     finalTranscript,
-    interimTranscript,
   ]);
 
   const startListening = () =>
